@@ -36,11 +36,7 @@ void testBucketKernel(BucketDescriptor* d_desc, int* values, int numValues) {
     bucket->flush(tid);
 }
 
-bool testBucket() {
-    const int CAP = 12;
-    const int BLOCKSIZE = 8;
-    const int MAX_BUCKETS = 16;
-
+bool testBucket(const int CAP, const int BLOCKSIZE, const int MAX_BUCKETS, const int NUM_VALUES) {
     int* d_data;
     int* d_headers;
     int* d_index;
@@ -50,8 +46,6 @@ bool testBucket() {
     HANDLE_CUDA_ERROR(cudaMalloc(&d_index, sizeof(int)));
 
     int* d_values;
-
-    const int NUM_VALUES = 100;
 
     HANDLE_CUDA_ERROR(cudaMalloc(&d_values, NUM_VALUES * sizeof(int)));
 
@@ -107,4 +101,22 @@ bool testBucket() {
     }
 
     return true;
+}
+
+// CAP, BLOCKSIZE, MAX_BUCKETS, NUM_VALUES
+
+bool testBucket1() {
+    return testBucket(8, 8, 16, 32);
+}
+
+bool testBucket2() {
+    return testBucket(12, 8, 16, 32);
+}
+
+bool testBucket3() {
+    return testBucket(4, 8, 16, 17);
+}
+
+bool testBucket4() {
+    return testBucket(8, 8, 16, 100);
 }
