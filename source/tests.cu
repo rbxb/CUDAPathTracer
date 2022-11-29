@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "test_prefix_sum.cu"
 #include "test_bucket.cu"
+#include "test_obj.cpp"
 
 int main(int argc, char* argv[]) {
     verifyCUDA(true);
@@ -16,6 +17,7 @@ int main(int argc, char* argv[]) {
     printf("Test bucket 2: %s\n", testBucket2() ? "OK" + (passed++ * 0) : "FAILED"); total++;
     printf("Test bucket 3: %s\n", testBucket3() ? "OK" + (passed++ * 0) : "FAILED"); total++;
     printf("Test bucket 4: %s\n", testBucket4() ? "OK" + (passed++ * 0) : "FAILED"); total++;
+    printf("Test read OBJ: %s\n", testObj() ? "OK" + (passed++ * 0) : "FAILED"); total++;
 
     printf("\nPassed %d / %d\n", passed, total);
 }

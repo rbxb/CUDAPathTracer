@@ -40,13 +40,11 @@ bool testBucket(const int CAP, const int BLOCKSIZE, const int MAX_BUCKETS, const
     int* d_data;
     int* d_headers;
     int* d_index;
+    int* d_values;
 
     HANDLE_CUDA_ERROR(cudaMalloc(&d_data, CAP * MAX_BUCKETS * sizeof(int)));
     HANDLE_CUDA_ERROR(cudaMalloc(&d_headers, MAX_BUCKETS * sizeof(int) * 2));
     HANDLE_CUDA_ERROR(cudaMalloc(&d_index, sizeof(int)));
-
-    int* d_values;
-
     HANDLE_CUDA_ERROR(cudaMalloc(&d_values, NUM_VALUES * sizeof(int)));
 
     int* h_values = (int*)malloc(NUM_VALUES * sizeof(int));
@@ -71,8 +69,8 @@ bool testBucket(const int CAP, const int BLOCKSIZE, const int MAX_BUCKETS, const
     HANDLE_CUDA_ERROR(cudaDeviceSynchronize());
 
     int numBuckets = 0;
-    int* h_data = (int*)calloc(CAP * MAX_BUCKETS, sizeof(int));
-    int* h_headers = (int*)calloc(MAX_BUCKETS, sizeof(int));
+    int* h_data = (int*)malloc(CAP * MAX_BUCKETS * sizeof(int));
+    int* h_headers = (int*)malloc(MAX_BUCKETS * sizeof(int) * 2);
 
     HANDLE_CUDA_ERROR(cudaMemcpy(&numBuckets, d_index, sizeof(int), cudaMemcpyDeviceToHost));
     HANDLE_CUDA_ERROR(cudaMemcpy(h_data, d_data, CAP * numBuckets * sizeof(int), cudaMemcpyDeviceToHost));
@@ -89,18 +87,29 @@ bool testBucket(const int CAP, const int BLOCKSIZE, const int MAX_BUCKETS, const
         }
     }
 
-    if (numBuckets != (NUM_VALUES - 1) / CAP + 1) return false;
+    bool passed = true;
+
+    if (numBuckets != (NUM_VALUES - 1) / CAP + 1) passed = false;
 
     int expected = 0;
 
     for (int i = 0; i < numBuckets; i++) {
         for (int k = 0; k < h_headers[i * 2 + 1]; k++) {
-            if (h_data[i * CAP + k] != expected) return false;
+            if (h_data[i * CAP + k] != expected) passed = false;
             expected++;
         }
     }
 
-    return true;
+    HANDLE_CUDA_ERROR(cudaFree(d_data));
+    HANDLE_CUDA_ERROR(cudaFree(d_headers));
+    HANDLE_CUDA_ERROR(cudaFree(d_index));
+    HANDLE_CUDA_ERROR(cudaFree(d_values));
+    HANDLE_CUDA_ERROR(cudaFree(d_desc));
+    free(h_data);
+    free(h_headers);
+    free(h_values);
+
+    return passed;
 }
 
 // CAP, BLOCKSIZE, MAX_BUCKETS, NUM_VALUES

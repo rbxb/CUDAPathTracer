@@ -21,11 +21,19 @@ bool testPrefixSum() {
 
     HANDLE_CUDA_ERROR(cudaMemcpy(h_numbers, d_numbers, n * sizeof(int), cudaMemcpyDeviceToHost));
 
+    bool passed = true;
+
     for (int i = 0; i < n; i++) {
         int k = i + 1;
         int expected = k * (k + 1) / 2;
-        if (h_numbers[i] != expected) return false;
+        if (h_numbers[i] != expected) {
+            passed = false;
+            break;
+        }
     }
 
-    return true;
+    HANDLE_CUDA_ERROR(cudaFree(d_numbers));
+    free(h_numbers);
+
+    return passed;
 }
