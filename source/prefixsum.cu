@@ -9,6 +9,7 @@ inline void sharedPrefixSum(int tid, T* list, int n) {
     __syncthreads();
 }
 
+// To use efficient prefix sum, n must be a power of 2
 template<typename T>
 __device__
 inline void efficientPrefixSum(int tid, T* list, int n) {

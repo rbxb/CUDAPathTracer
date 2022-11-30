@@ -45,7 +45,8 @@ void PinholeCamera::setOutputFrame(int width, int height, int density) {
 
 void PinholeCamera::setOrientation(Ray orientation) {
     origin = orientation.origin;
-    rotation = RodriguesRotation(Point(0,0,1), orientation.dir);
+    Point dir = normalize(orientation.dir);
+    rotation = RodriguesRotation(Point(0,0,1), dir);
 }
 
 namespace __PinholeCamera_private_upload_kernel {
@@ -64,10 +65,10 @@ Camera* PinholeCamera::upload() {
 
 __device__
 Ray PinholeCamera::createRay(int pixel, int k) {
-    float u = (pixel % framew) / fovw - fovw * 0.5f;
-    float v = (pixel / framew) / fovh - fovh * 0.5f;
+    float u = (pixel % framew + 0.5f) / framew * fovw - fovw * 0.5f;
+    float v = (pixel / framew + 0.5f) / frameh * fovh - fovh * 0.5f;
     v *= -1; // flip y axis
 
-    Point dir = rotation.rotate(Point(u,v,d));
+    Point dir = normalize(rotation.rotate(Point(u,v,d)));
     return Ray(origin, dir);
 }

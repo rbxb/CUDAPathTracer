@@ -6,6 +6,8 @@
 // Rodrigues' rotation formula
 // Finds the rotation needed to get from base to newBase, then applies that rotation to v
 
+#define SMALL_FLT 0.000001f
+
 struct RodriguesRotation {
     __host__ __device__ RodriguesRotation() {axis=Point(); theta=0;};
     __host__ __device__ RodriguesRotation(const Point& base, const Point& newBase);
@@ -23,5 +25,6 @@ RodriguesRotation::RodriguesRotation(const Point& base, const Point& newBase) {
 
 __host__ __device__
 Point RodriguesRotation::rotate(const Point& v) {
+    if (theta < SMALL_FLT) return v;
     return v * cosf(theta) + cross(axis, v) * sinf(theta) + axis * dot(axis, v) * (1 - cosf(theta));
 }

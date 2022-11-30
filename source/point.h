@@ -8,13 +8,6 @@ struct Point {
     __host__ __device__ inline Point() {this->x=0; this->y=0; this->z=0;};
     __host__ __device__ inline Point(float x) {this->x=x; this->y=x; this->z=x;};
     __host__ __device__ inline Point(float x, float y, float z) {this->x=x; this->y=y; this->z=z;};
-    __host__ __device__ inline Point(float* a) {unpack(a);};
-    __host__ __device__ inline Point(float* a, int index) {unpack(a, index);};
-
-    __host__ __device__ inline void unpack(float* a) {unpack(a, 0);};
-    __host__ __device__ inline void unpack(float* a, int index) {x=a[index * 3]; y=a[index * 3 + 1]; z=a[index * 3 + 2];};
-    __host__ __device__ inline void pack(float* a) {pack(a, 0);};
-    __host__ __device__ inline void pack(float* a, int index) {a[index * 3]=x; a[index * 3 + 1]=y; a[index * 3 + 2]=z;};
 
     __host__ __device__ inline Point& operator+=(const Point& b) {x+=b.x; y+=b.y; z+=b.z; return *this;};
     __host__ __device__ inline Point& operator-=(const Point& b) {x-=b.x; y-=b.y; z-=b.z; return *this;};
