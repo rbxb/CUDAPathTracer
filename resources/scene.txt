@@ -1,0 +1,10 @@
+object resources/die.obj
+translate 4 0 0
+
+object resource/die.obj
+translate -2 0 0
+
+object resource/skybox.obj
+scale 100
+
+camera 6 -2 -10 -5.5 2.5 10.5

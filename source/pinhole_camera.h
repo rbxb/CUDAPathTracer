@@ -4,71 +4,37 @@
 #include "constants.h"
 #include "point.h"
 #include "rotate.h"
-
 #include <new>
 
 class PinholeCamera : public Camera {
 public:
-    PinholeCamera(float fovWidth, float fovDegrees);
-    void setOutputFrame(int width, int height, int density);
-    void setOrientation(Ray orientation);
-    Camera* upload();
-    __device__ Ray createRay(int pixel, int k);
+    Ray* createRays(int* n);
 
 private:
-    float fovw;
-    float fovh;
-    float d;
-    int framew;
-    int frameh;
-    int density;
-    Point origin;
-    RodriguesRotation rotation;
+    Ray createRay(int y, int x, float world_w, float world_h);
 };
 
-PinholeCamera::PinholeCamera(float fovWidth, float fovDegrees) {
-    fovw = fovWidth;
-    float theta = fovDegrees * 0.01745329f; // convert degrees to radians
-    d = fovw / tanf(theta * 0.5f);
+Ray* PinholeCamera::createRays(int* n) {
+    *n = width * height;
+    Ray* a = (Ray*)malloc(sizeof(Ray) * *n);
 
-    fovh = framew = frameh = fovw;
-    origin = Point(0,0,0);
-    rotation = RodriguesRotation();
-}
+    float theta = fov * 0.01745329f;
+    float world_w = tanf(theta * 0.5f) * 2 * d;
+    float world_h = world_w * height / width;
 
-void PinholeCamera::setOutputFrame(int width, int height, int density) {
-    framew = width;
-    frameh = height;
-    this->density = density;
-    fovh = ((float)height) / width * fovw;
-}
-
-void PinholeCamera::setOrientation(Ray orientation) {
-    origin = orientation.origin;
-    Point dir = normalize(orientation.dir);
-    rotation = RodriguesRotation(Point(0,0,1), dir);
-}
-
-namespace __PinholeCamera_private_upload_kernel {
-    __global__
-    void kernel(PinholeCamera c, PinholeCamera* p) {
-        p = new(p) PinholeCamera(c);
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            a[y * width + x] = createRay(x, y, world_w, world_h);
+        }
     }
-};
 
-Camera* PinholeCamera::upload() {
-    PinholeCamera* p;
-    HANDLE_CUDA_ERROR(cudaMalloc(&p, sizeof(PinholeCamera)));
-    __PinholeCamera_private_upload_kernel::kernel<<<1,1>>>(*this, p);
-    return p;
+    return a;
 }
 
-__device__
-Ray PinholeCamera::createRay(int pixel, int k) {
-    float u = (pixel % framew + 0.5f) / framew * fovw - fovw * 0.5f;
-    float v = (pixel / framew + 0.5f) / frameh * fovh - fovh * 0.5f;
-    v *= -1; // flip y axis
+Ray PinholeCamera::createRay(int x, int y, float world_w, float world_h) {
+    float u = (float(x) / width - 0.5f) * world_w;
+    float v = (float(y) / height - 0.5f) * world_h * -1;
 
-    Point dir = normalize(rotation.rotate(Point(u,v,d)));
+    Point dir = normalize(rotation.rotate(Point(u, v, d)));
     return Ray(origin, dir);
 }

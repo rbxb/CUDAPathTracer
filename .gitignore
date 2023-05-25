@@ -1,2 +1,5 @@
-build/*
-out/*
+build/
+out/
+source/__pycache__/
+source/.vscode/
+venv/

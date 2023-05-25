@@ -123,3 +123,9 @@ __host__ __device__
 inline Point max(const Point& a, const Point& b) {
     return Point(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
 }
+
+__host__ __device__
+inline Point inverse(const Point &a)
+{
+    return Point(1/a.x,1/a.y,1/a.z);
+}
