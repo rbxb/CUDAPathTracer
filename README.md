@@ -1,1 +1,3 @@
 # CUDAPathTracer
+
+![teapot](teapot.webp)
